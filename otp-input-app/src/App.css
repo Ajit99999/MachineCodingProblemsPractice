@@ -1,0 +1,21 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.main-container {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+.input-container {
+  height: 50px;
+  width: 50px;
+  font-size: 24px;
+  text-align: center;
+  border-radius: 2px 2px;
+  border: 2px solid black;
+}
