@@ -5,17 +5,24 @@ const VirtualList = ({
   width = 300,
   data,
   sizePerElement = 30,
+  loadMore,
 }) => {
   const [startIndex, setStartIndex] = useState(0);
   const [endIndex, setEndIndex] = useState(Math.floor(height / sizePerElement));
   function onScrollHandler(e) {
-    const elem = Math.floor(e.target.scrollTop / sizePerElement);
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const elem = Math.floor(scrollTop / sizePerElement);
     setStartIndex(elem);
     setEndIndex(Math.floor(height / sizePerElement) + elem);
+
+    // adding infinite scroll Effect as well
+    const remainingHeight = scrollHeight - (scrollTop + clientHeight);
+    if (remainingHeight < 20) {
+      loadMore();
+    }
   }
 
   const sliceData = data.slice(startIndex, endIndex + 1);
-  console.log(sliceData, "data length", startIndex, "start", endIndex);
   return (
     <div
       onScroll={onScrollHandler}
