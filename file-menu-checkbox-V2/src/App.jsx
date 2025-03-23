@@ -20,7 +20,20 @@ const data = {
               id: 5,
               name: "publicFolder5",
               checked: false,
-              children: [],
+              children: [
+                {
+                  id: 7,
+                  name: "publicFolder7",
+                  checked: false,
+                  children: [],
+                },
+                {
+                  id: 8,
+                  name: "publicFolder8",
+                  checked: false,
+                  children: [],
+                },
+              ],
             },
           ],
         },
@@ -52,30 +65,54 @@ function App() {
       }
       const updatedNode = { ...node, checked: e.target.checked };
       newMap.set(node.id, updatedNode);
-      node.children.forEach((elem) => {
-        traverse(elem);
-      });
 
-      function updateParents(id) {
-        const parentNode = newMap.get(id);
+      function updateParents(node) {
+        const parentNode = newMap.get(node.parentId);
+        console.log(parentNode, "parentNode");
         if (!parentNode) {
           return;
         }
         const allChecked = parentNode.children.every(
-          (childId) => newMap.get(childId).checked
+          (elem) => newMap.get(elem).checked
         );
         const allUnChecked = parentNode.children.some(
-          (childId) => newMap.get(childId).checked
+          (elem) => newMap.get(elem).checked
         );
 
-        newMap.set(id, {
+        newMap.set(parentNode.id, {
           ...parentNode,
           checked: allChecked ? true : allUnChecked ? false : false,
         });
-        updateParents(parentNode.parentId);
+        updateParents(parentNode);
       }
+      updateParents(node);
 
-      updateParents(node.parentId);
+      node.children.forEach((elem) => {
+        traverse(elem);
+      });
+
+      //  you can write it after updating all the children state as well
+
+      // function updateParents(id) {
+      //   const parentNode = newMap.get(id);
+      //   if (!parentNode) {
+      //     return;
+      //   }
+      //   const allChecked = parentNode.children.every(
+      //     (childId) => newMap.get(childId).checked
+      //   );
+      //   const allUnChecked = parentNode.children.some(
+      //     (childId) => newMap.get(childId).checked
+      //   );
+
+      //   newMap.set(id, {
+      //     ...parentNode,
+      //     checked: allChecked ? true : allUnChecked ? false : false,
+      //   });
+      //   updateParents(parentNode.parentId);
+      // }
+
+      // updateParents(node.parentId);
     }
 
     traverse(id);
