@@ -7,6 +7,7 @@ const PollWidgetListItem = ({
   voteDone,
   pollData,
   votes,
+  isMulti,
 }) => {
   //   console.log(
   //     votes,
@@ -16,6 +17,16 @@ const PollWidgetListItem = ({
   //     (votes / pollData.totalVotes) * 100
   //   );
   const percentageValue = Math.floor((votes / pollData.totalVotes) * 100);
+
+  let checked;
+  if (isMulti) {
+    checked =
+      (Array.isArray(selectedOption) && selectedOption.includes(value)) ||
+      false;
+  } else {
+    checked = selectedOption === value;
+  }
+
   return (
     <div
       style={{
@@ -43,9 +54,10 @@ const PollWidgetListItem = ({
           <input
             name={name}
             onChange={onChange}
-            checked={selectedOption === value}
+            // checked={selectedOption === value}
+            checked={checked}
             value={value}
-            type="radio"
+            type={`${isMulti ? "checkbox" : "radio"}`}
           />
           <label> {label} </label>
         </div>
@@ -56,17 +68,23 @@ const PollWidgetListItem = ({
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
-              gap: "10px",
+              gap: "2px",
             }}
           >
             <div>Votes: {votes}</div>
-            <div>{percentageValue}%</div>
+            <div>({percentageValue}%)</div>
           </div>
         )}
       </div>
       {voteDone && (
         <div>
-          <input max={100} value={percentageValue} min={0} type="range" />
+          <input
+            max={100}
+            readOnly={true}
+            value={percentageValue}
+            min={0}
+            type="range"
+          />
         </div>
       )}
     </div>

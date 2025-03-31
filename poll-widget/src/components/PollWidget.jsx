@@ -29,42 +29,77 @@ const data = {
 };
 const PollWidget = () => {
   const [pollData, setPollData] = useState(data);
-
   const [selectedOption, setSelectedOption] = useState("");
   const [voteDone, setVoteDone] = useState(false);
   const prevSelectedValue = useRef(null);
-  function onChangeHandler(e) {
-    setSelectedOption(e.target.value);
-    prevSelectedValue.current = selectedOption;
+  const [isMulti, setIsMulti] = useState(false);
 
-    const updatedPollDataOptions = pollData.options
-      .map((option) => {
-        if (option.value === e.target.value) {
+  function onChangeHandler(e) {
+    const { value, type, checked } = e.target;
+
+    if (type === "checkbox") {
+      if (checked) {
+        const updatedPollDataOptions = pollData.options.map((option) => {
+          if (option.value === value) {
+            return { ...option, votes: option.votes + 1 };
+          } else {
+            return option;
+          }
+        });
+        updatePollDateFnHandler(updatedPollDataOptions);
+        setSelectedOption([...(selectedOption || []), value]);
+      } else {
+        prevSelectedValue.current = value;
+        const updatedPollDataOptions = pollData.options.map((option) => {
+          if (option.value === prevSelectedValue.current) {
+            return { ...option, votes: option.votes - 1 };
+          } else {
+            return option;
+          }
+        });
+        updatePollDateFnHandler(updatedPollDataOptions);
+        const updatedSelectedOption = selectedOption.filter((option) => {
+          return option !== value;
+        });
+        setSelectedOption(updatedSelectedOption);
+      }
+
+      function updatePollDateFnHandler(updatedPollDataOptions) {
+        const updatedPollData = {
+          ...pollData,
+          options: updatedPollDataOptions,
+          totalVotes: updatedPollDataOptions.reduce((acc, elem) => {
+            return acc + elem.votes;
+          }, 0),
+        };
+        setPollData(updatedPollData);
+        setVoteDone(true);
+      }
+    } else if (type === "radio") {
+      setSelectedOption(value);
+      prevSelectedValue.current = selectedOption;
+      const updatedPollDataOptions = pollData.options.map((option) => {
+        if (option.value === value) {
           return { ...option, votes: option.votes + 1 };
-        } else {
-          return option;
         }
-      })
-      .map((option) => {
-        if (option.value === prevSelectedValue.current) {
+        // either you declare an useRef or you can use the state simply
+        if (option.value === selectedOption) {
           return { ...option, votes: option.votes - 1 };
-        } else {
-          return option;
         }
+        return option;
       });
 
-    const updatedPollData = {
-      ...pollData,
-      options: updatedPollDataOptions,
-      totalVotes: updatedPollDataOptions.reduce((acc, elem) => {
-        return acc + elem.votes;
-      }, 0),
-    };
-    setPollData(updatedPollData);
-    setVoteDone(true);
+      const updatedPollData = {
+        ...pollData,
+        options: updatedPollDataOptions,
+        totalVotes: updatedPollDataOptions.reduce((acc, elem) => {
+          return acc + elem.votes;
+        }, 0),
+      };
+      setPollData(updatedPollData);
+      setVoteDone(true);
+    }
   }
-
-  console.log(pollData, "pollData");
 
   return (
     <>
@@ -73,6 +108,7 @@ const PollWidget = () => {
           <p> Question:{pollData.question}</p>
         </div>
         <PollWidgetList
+          isMulti={isMulti}
           pollData={pollData}
           voteDone={voteDone}
           onChange={onChangeHandler}
@@ -86,12 +122,11 @@ const PollWidget = () => {
             gap: "10px",
           }}
         >
-          {" "}
           {voteDone && (
             <button
               onClick={() => {
                 setVoteDone(false);
-                setSelectedOption("");
+                setSelectedOption(isMulti ? [] : "");
               }}
             >
               Clear vote
@@ -101,15 +136,26 @@ const PollWidget = () => {
             <button
               onClick={() => {
                 setVoteDone(false);
-                setSelectedOption("");
+                // depend upon isMulti, resetting the value selectedOption
+                setSelectedOption(isMulti ? [] : "");
                 setPollData(data);
               }}
             >
               Reset
             </button>
-          )}{" "}
+          )}
+          {!voteDone && (
+            <button
+              onClick={() => {
+                setIsMulti((prev) => {
+                  return !prev;
+                });
+              }}
+            >
+              {!isMulti ? "Enable Multi-Check" : "Disable Multi-Check"}
+            </button>
+          )}
         </div>
-       
       </div>
     </>
   );
