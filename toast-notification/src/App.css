@@ -52,17 +52,21 @@
   justify-content: space-between;
   padding: 5px 15px;
   color: white;
-  animation: ease-in 1s width;
+  animation: slideIn 0.3s ease-out;
   margin: 10px 10px;
+  
 }
-@keyframes animation {
-  0% {
-
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
   }
-  100% {
-
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
+
 .top-right {
   position: fixed;
   top: 50px;
@@ -97,4 +101,11 @@
 }
 .warning {
   background-color: rgb(247, 247, 107)
+}
+.toast-wrapper {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
 }

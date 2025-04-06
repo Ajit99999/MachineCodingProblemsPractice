@@ -5,14 +5,11 @@ import ToastItem from "./components/ToastItem";
 function App() {
   const timer = useRef({});
   const [toasts, setToasts] = useState([]);
+
   function onClickHandler(type, label, position, show) {
-    // timer.current = setTimeout(() => {
-    //   console.log("called");
-    //   setShow(false);
-    // }, 1000);
     const id = Date.now();
-    setToasts([
-      ...toasts,
+    setToasts((prev) => [
+      ...prev,
       {
         type,
         label,
@@ -22,76 +19,66 @@ function App() {
       },
     ]);
     timer.current[id] = setTimeout(() => {
-      console.log("callled");
-      setToasts((prev) => {
-        const updatedToasts = prev.filter((toast) => {
-          return toast.id !== id;
-        });
-        return updatedToasts;
-      });
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
       delete timer.current[id];
     }, 5000);
   }
+
   function onCloseHandler(id) {
     clearTimeout(timer.current[id]);
     delete timer.current[id];
-    const updatedToasts = toasts.filter((toast) => {
-      return toast.id !== id;
-    });
-    setToasts(updatedToasts);
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }
 
-  console.log(toasts, "toasts");
-  console.log(timer.current, Object.keys(timer.current).length, "timer");
+  function getToastsByPosition(toasts, position) {
+    return toasts.filter((toast) => toast.position === position);
+  }
+
+  const positions = ["top-right", "top-left", "bottom-right", "bottom-left"];
+
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          alignItems: "center",
-        }}
-      >
-        {toasts &&
-          toasts.map((toast) => {
-            return (
-              <ToastItem
-                onClick={onCloseHandler}
-                key={toast.id}
-                show={toast.show}
-                {...toast}
-              />
-            );
-          })}
-      </div>
-      {/* <ToastItem
-        onClick={onCloseHandler}
-        show={show}
-        type={"info"}
-        label={"Success"}
-        position={"top-right"}
-      /> */}
+      {positions.map((position) => {
+        const positionToasts = getToastsByPosition(toasts, position);
+        if (positionToasts.length === 0) return null;
 
-      <div>
+        return (
+          <div key={position} className={`toast-wrapper ${position}`}>
+            {positionToasts.map((toast) => (
+              <ToastItem key={toast.id} {...toast} onClick={onCloseHandler} />
+            ))}
+          </div>
+        );
+      })}
+      <div style={{ marginTop: "100px" }}>
         <button
-          onClick={() => {
-            onClickHandler("success", "Success message", "top-right", true);
-          }}
+          onClick={() =>
+            onClickHandler("success", "Success message", "top-right", true)
+          }
         >
-          {" "}
-          Success{" "}
+          Success
         </button>
-      </div>
-      <div>
-        <button> Warning </button>
-      </div>
-
-      <div>
-        <button> Danger </button>
-      </div>
-      <div>
-        <button> Info </button>
+        <button
+          onClick={() =>
+            onClickHandler("warning", "Warning message", "top-left", true)
+          }
+        >
+          Warning
+        </button>
+        <button
+          onClick={() =>
+            onClickHandler("danger", "Danger message", "bottom-right", true)
+          }
+        >
+          Danger
+        </button>
+        <button
+          onClick={() =>
+            onClickHandler("info", "Info message", "bottom-left", true)
+          }
+        >
+          Info
+        </button>
       </div>
     </>
   );
